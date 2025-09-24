@@ -18,8 +18,19 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 // Parse CORS origins from environment variable
-const corsOriginEnv = process.env.CORS_ORIGIN || 'http://localhost:3000';
-const corsOrigins = corsOriginEnv.split(',').map(origin => origin.trim());
+const corsOriginEnv = process.env.CORS_ORIGIN;
+let corsOrigins;
+if (corsOriginEnv) {
+    // Parse CSV format: "http://localhost:3000,https://teamapp-frontend-react.vercel.app"
+    corsOrigins = corsOriginEnv.split(',').map(origin => origin.trim());
+} else {
+    // Fallback to default origins for development
+    corsOrigins = [
+        'http://localhost:3000',
+        'https://teamapp-frontend-react.vercel.app',
+        'https://teamapp-frontend-react-4q6ea3ipa-haroons-projects-41fe01b2.vercel.app'
+    ];
+}
 
 // Connection rate limiting - improved for localhost and legitimate users
 const connectionAttempts = new Map(); // IP -> { count, lastAttempt, isLocalhost, expiredTokenAttempts }

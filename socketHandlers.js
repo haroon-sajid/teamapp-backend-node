@@ -14,7 +14,10 @@ const socketUsers = new Map(); // socketId -> userInfo
  */
 async function getProjectTeamId(projectId, token) {
   try {
-    const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
+    const pythonBackendUrl = process.env.PYTHON_BACKEND_URL;
+    if (!pythonBackendUrl) {
+        throw new Error('PYTHON_BACKEND_URL environment variable is required');
+    }
     
     const response = await axios.get(`${pythonBackendUrl}/api/projects/${projectId}`, {
       headers: {
