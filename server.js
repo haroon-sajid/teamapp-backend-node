@@ -17,7 +17,9 @@ const server = http.createServer(app);
 // Configuration
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
+// Parse CORS origins from environment variable
+const corsOriginEnv = process.env.CORS_ORIGIN || 'http://localhost:3000';
+const corsOrigins = corsOriginEnv.split(',').map(origin => origin.trim());
 
 // Connection rate limiting - improved for localhost and legitimate users
 const connectionAttempts = new Map(); // IP -> { count, lastAttempt, isLocalhost, expiredTokenAttempts }
@@ -102,12 +104,7 @@ setInterval(() => {
 // CORS configuration for Socket.IO
 const io = socketIo(server, {
   cors: {
-    origin: [
-      "http://localhost:3000", 
-      "http://127.0.0.1:3000",
-      "https://your-frontend-domain.com", // Add your production frontend URL
-      process.env.FRONTEND_URL || "http://localhost:3000"
-    ],
+    origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Authorization", "Content-Type", "X-Requested-With"]
@@ -120,12 +117,7 @@ const io = socketIo(server, {
 
 // Middleware
 app.use(cors({
-  origin: [
-    CORS_ORIGIN,
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    process.env.FRONTEND_URL || "http://localhost:3000"
-  ],
+  origin: corsOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With']
@@ -715,7 +707,7 @@ Team Collaboration WebSocket Server Started!
 ==========================================
 Server: http://localhost:${currentPort}
 Environment: ${NODE_ENV}
-CORS Origin: ${CORS_ORIGIN}
+CORS Origins: ${corsOrigins.join(', ')}
 Health Check: http://localhost:${currentPort}/health
 WebSocket: ws://localhost:${currentPort}
 ==========================================
